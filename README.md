@@ -4,10 +4,10 @@ i18n CLI
 ## Quickstart: Create Spreadsheet
 
 1. Install the i18n cli tool.
-  * `npm install -g @bretkikehara/i18n-cli`
-2. Generate a [Google console service key](https://github.com/bretkikehara/i18n-cli/wiki/Generating-Service-Account-Credentials).
+  * `npm install -g @coverhound/i18n-cli`
+2. Generate a [Google console service key](https://github.com/coverhound/i18n-cli/wiki/Generating-Service-Account-Credentials).
 3. Enable the Google Sheets or Google Drive APIs.
-4. Create a [project config file](https://github.com/bretkikehara/i18n-cli#config-file).
+4. Create a [project config file](https://github.com/coverhound/i18n-cli#config-file).
 5. On the command line, generate an uploadable CSV.
   * `i18n csv <project>`
 6. Create a Google Sheet that will can be shared.

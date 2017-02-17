@@ -21,13 +21,27 @@ function transformBundle(ext, serializer, output, locale, bundles) {
     const bundlePath = `${ output }/${ locale }/${ bundleFile }`;
     const bundle = bundles[bName];
     const data = serializer(bundle) + '\n';
+
+    // need to check for existence otherwise require will fail silently
+    const existingBundle = fs.existsSync(bundlePath) && require(bundlePath);
+
+    const bundleData = {
+      locale: locale,
+      bName: bName,
+      fileName: bundleFile,
+      output: bundlePath,
+      newFile: !existingBundle
+    }
+
+    // no need to regenerate a bundle that has not been modified
+    if (existingBundle && JSON.stringify(existingBundle) === JSON.stringify(bundle)) {
+      bundleData.changed = false;
+      return Promise.resolve(bundleData);
+    }
+
     return writeFile(bundlePath, data).then(function () {
-      return Promise.resolve({
-        locale: locale,
-        bName: bName,
-        fileName: bundleFile,
-        output: bundlePath,
-      });
+      bundleData.changed = true;
+      return Promise.resolve(bundleData);
     }, function (err) {
       return Promise.reject(err);
     });
@@ -177,26 +191,47 @@ function toUnderscoreCase(str) {
 }
 
 function generateLocaleExports(outputPath, locales) {
+  const localeExportPath = `${ outputPath }/index.js`;
+  const existingLocales = fs.existsSync(localeExportPath) && require(localeExportPath);
+
+  // check if new locales have been added, eg. en_GB
+  // if not, bail out
+  if (existingLocales) {
+    const existingLocaleKeys = Object.keys(existingLocales).sort()
+
+    if (
+      locales.length === existingLocaleKeys.length &&
+      locales.sort().every((loc, idx) => loc === existingLocaleKeys[idx])
+    ) {
+      return;
+    }
+  }
+
   var i18nIndexFile = writeTemplate(`
     ${ timestampComment() }
 
     ${ locales.map(function (locale) {
-      return `import * as ${ toUnderscoreCase(locale).toUpperCase() } from './${ locale }';`;
+      return `const ${ toUnderscoreCase(locale).toUpperCase() } = require('./${ locale }');`;
     }).join('\n') }
 
-    export default {
+    module.exports = {
       ${ locales.map(function (locale) {
         return `\t'${ locale }': ${ toUnderscoreCase(locale).toUpperCase() },`;
       }).join('\n') }
     }
   `);
-  return writeFile(`${ outputPath }/index.js`, i18nIndexFile);
+  return writeFile(localeExportPath, i18nIndexFile);
 }
 
 function generateBundleExports(outputPath, files, locales) {
+  // don't generate the bundle index if there are no new files
+  if (!files || !files.length || files.every(f => !f.newFile)) {
+    return;
+  }
+
   var epxt = {};
   (files || []).forEach(function (file) {
-    epxt[file.bName] = `import ${ file.bName } from './${ file.fileName }';`;
+    epxt[file.bName] = `const ${ file.bName } = require('./${ file.fileName }');`;
   });
 
   var sortedKeys = Object.keys(epxt).sort();
@@ -207,7 +242,7 @@ function generateBundleExports(outputPath, files, locales) {
       return epxt[key];
     }).join('\n') }
 
-    export {
+    module.exports = {
       ${ sortedKeys.map(function (key) {
         return `\t${ key },`;
       }).join('\n') }
@@ -227,6 +262,10 @@ function downloadBundles(serviceKey, spreadsheetId, sheetname, range, output, ty
       const bundles = parseRows(locales, response.values);
       return Promise.all(WRITE_BUNDLE[type](output, locales, bundles)).then(function (files) {
         (files || []).forEach(function (o) {
+          if (!o || !o.changed) {
+            return;
+          }
+
           console.log(`[${ sheetname }] wrote "${ o.bName }" - ${ o.output }`);
         });
 
