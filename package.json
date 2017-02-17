@@ -1,5 +1,5 @@
 {
-  "name": "@bretkikehara/i18n-cli",
+  "name": "@coverhound/i18n-cli",
   "version": "1.4.1",
   "description": "i18n command line interface manager",
   "main": "src/cli.js",
@@ -7,10 +7,13 @@
     "i18n": "src/cli.js"
   },
   "scripts": {
-    "postpublish": "gulp postpublish",
+    "release": "np",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Bret K. Ikehara <bret.k.ikehara@gmail.com>",
+  "authors": [
+    "Bret K. Ikehara <bret.k.ikehara@gmail.com>",
+    "Kyle Alwyn <kyle@coverhound.com>"
+  ],
   "license": "MIT",
   "dependencies": {
     "glob": "^7.1.0",
@@ -21,9 +24,6 @@
     "yargs": "^6.3.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-git": "^1.12.0",
-    "gulp-load-plugins": "^1.4.0",
-    "gulp-util": "^3.0.7"
+    "np": "^2.12.0"
   }
 }
