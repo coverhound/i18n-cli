@@ -1,6 +1,6 @@
 {
   "name": "@coverhound/i18n-cli",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "i18n command line interface manager",
   "main": "src/cli.js",
   "bin": {
