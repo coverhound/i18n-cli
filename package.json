@@ -7,8 +7,7 @@
     "i18n": "src/cli.js"
   },
   "scripts": {
-    "release": "np",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release": "np --yolo"
   },
   "authors": [
     "Bret K. Ikehara <bret.k.ikehara@gmail.com>",
