@@ -67,12 +67,11 @@ function timestampComment() {
 }
 
 const WRITE_SERIIALIZER = {
-  json: function (bundle) {
+  json(bundle) {
     return JSON.stringify(bundle, null, 2);
   },
-  module: function (bundle) {
-    const bundleData = JSON.stringify(bundle);
-    return `${ timestampComment() }\nmodule.exports = ${ bundleData };`;
+  module(bundle) {
+    return `${ timestampComment() }\n\nmodule.exports = ${JSON.stringify(bundle, null, 2)};`;
   },
 };
 
