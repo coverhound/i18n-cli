@@ -12,7 +12,8 @@
   },
   "authors": [
     "Bret K. Ikehara <bret.k.ikehara@gmail.com>",
-    "Kyle Alwyn <kyle@coverhound.com>"
+    "Kyle Alwyn <kyle@coverhound.com>",
+    "Bernardo Farah <bernardo@coverhound.com>"
   ],
   "license": "MIT",
   "dependencies": {
