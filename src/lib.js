@@ -62,16 +62,12 @@ function parseAsArray(arr, split) {
   return arr;
 }
 
-function timestampComment() {
-  return `/** auto-generated on ${ TIMESTAMP_DATE } */`;
-}
-
 const WRITE_SERIIALIZER = {
   json(bundle) {
     return JSON.stringify(bundle, null, 2);
   },
   module(bundle) {
-    return `${ timestampComment() }\n\nmodule.exports = ${JSON.stringify(bundle, null, 2)};`;
+    return `module.exports = ${JSON.stringify(bundle, null, 2)};`;
   },
 };
 
@@ -207,8 +203,6 @@ function generateLocaleExports(outputPath, locales) {
   }
 
   var i18nIndexFile = writeTemplate(`
-    ${ timestampComment() }
-
     ${ locales.map(function (locale) {
       return `const ${ toUnderscoreCase(locale).toUpperCase() } = require('./${ locale }');`;
     }).join('\n') }
@@ -235,8 +229,6 @@ function generateBundleExports(outputPath, files, locales) {
 
   var sortedKeys = Object.keys(epxt).sort();
   var langIndexFile = writeTemplate(`
-    ${ timestampComment() }
-
     ${ sortedKeys.map(function (key) {
       return epxt[key];
     }).join('\n') }
@@ -259,7 +251,8 @@ function downloadBundles(serviceKey, spreadsheetId, sheetname, range, output, ty
     readSheet(authClient, spreadsheetId, `${ sheetname }!${ range }`).then(function (response) {
       console.log(`[${ sheetname }] writing bundles to ${ output }`);
       const bundles = parseRows(locales, response.values);
-      return Promise.all(WRITE_BUNDLE[type](output, locales, bundles)).then(function (files) {
+      const path = `${output}/${sheetname}`;
+      return Promise.all(WRITE_BUNDLE[type](path, locales, bundles)).then(function (files) {
         (files || []).forEach(function (o) {
           if (!o || !o.changed) {
             return;
@@ -271,8 +264,8 @@ function downloadBundles(serviceKey, spreadsheetId, sheetname, range, output, ty
         if (type === 'module') {
           console.log(`[${ sheetname }] Generating imports`);
           return Promise.all([
-            generateLocaleExports(output, locales),
-            generateBundleExports(output, files, locales),
+            generateLocaleExports(path, locales),
+            generateBundleExports(path, files, locales),
           ]).then(function () {
             console.log(`[${ sheetname }] Finished generating importing`);
           }, function () {
