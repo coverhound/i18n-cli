@@ -244,7 +244,7 @@ function generateBundleExports(outputPath, files, locales) {
   });
 }
 
-function downloadBundles(serviceKey, spreadsheetId, sheetname, range, output, type, locales) {
+function downloadBundles({ serviceKey, spreadsheetId, sheetname, range, output, type, locales }) {
   console.log(`[${ sheetname }] authorizing access to ${ spreadsheetId }`);
   authorize(serviceKey).then(function (authClient) {
     console.log(`[${ sheetname }] reading ${ spreadsheetId }`);
@@ -446,7 +446,9 @@ function writeFile(output, data) {
   });
 }
 
-function generateCSV(sheetname, path, transform, output, locales) {
+function generateCSV({ sheetname, path, transform, output, filename, locales }) {
+  output = `${output}/${filename}`;
+
   console.log(`[${ sheetname }] finding bundles files`);
   globLocaleBundles(locales, path, transform).then(function(files) {
     console.log(`[${ sheetname }] reading the bundles data`);
@@ -549,7 +551,7 @@ function retrieveSheets(authClient, spreadsheetId) {
   });
 }
 
-function generateFilterViews(serviceKey, spreadsheetId, sheetname, range, path, transform, locales) {
+function generateFilterViews({ serviceKey, spreadsheetId, sheetname, range, path, transform, locales }) {
   console.log(`[${ sheetname }] finding bundles to create filter views`);
   globLocaleBundles(locales, path, transform).then(function (files) {
     var bundleNames = files.map(getBundleName).sort();

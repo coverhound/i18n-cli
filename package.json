@@ -1,17 +1,19 @@
 {
   "name": "@coverhound/i18n-cli",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "i18n command line interface manager",
   "main": "src/cli.js",
   "bin": {
     "i18n": "src/cli.js"
   },
   "scripts": {
-    "release": "np --yolo"
+    "release": "np --yolo",
+    "test": "mocha  --require test/test-helper.js test/**/*.spec.js"
   },
   "authors": [
     "Bret K. Ikehara <bret.k.ikehara@gmail.com>",
-    "Kyle Alwyn <kyle@coverhound.com>"
+    "Kyle Alwyn <kyle@coverhound.com>",
+    "Bernardo Farah <bernardo@coverhound.com>"
   ],
   "license": "MIT",
   "dependencies": {
@@ -23,6 +25,9 @@
     "yargs": "^6.3.0"
   },
   "devDependencies": {
-    "np": "^2.12.0"
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "np": "^2.12.0",
+    "sinon": "^2.0.0"
   }
 }
