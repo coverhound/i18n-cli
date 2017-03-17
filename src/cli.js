@@ -36,9 +36,7 @@ const cli = (config) => (
     .argv
 );
 
-readConfig().then(function (config) {
-  cli(config);
-}, function (err) {
+readConfig().then(cli).catch((err) => {
   console.error('ERROR: runtime config file cannot be found!\n\n');
   cli({});
 });
