@@ -18,7 +18,7 @@ Now the spreadsheet should be ready to generate bundle files.
 ## Quickstart: Generate Localization Bundles
 
 1. Ensure the project's `sheetname` config is the same name as the Google Spreadsheet sheet name.
-2. Ensure config `path` points to your app's localization directory.
+2. Ensure config `dir` points to your app's localization directory.
 3. Exec `i18n bundles <project>` to create the project's localization bundles.
 4. Ensure that the `react-i18n` module is imported inside your component.
 5. Load you app to see the updates.
@@ -40,11 +40,11 @@ module.exports = (function(env) {
       "project1": {
         "spreadsheetId": "google-sheet-id",
         "range": "sheet-name!A1:M1000",
-        "output": `${ env.HOME }/project-name2/i18n-directory`,
+        "dir": `${ env.HOME }/project-name2/i18n-directory`,
         "locales": [
           "en-US",
         ],
-        "format": "module",
+        "format": "commonjs",
       }
     }
   };
@@ -57,12 +57,12 @@ module.exports = (function(env) {
   return {
     "serviceKey": env.I18N_KEY || `${ env.HOME }/.google/service-key-lang.json`,
     "spreadsheetId": "google-sheet-id",
-    "output": `${ env.HOME }/project-name/i18n-directory`,
+    "dir": `${ env.HOME }/project-name/i18n-directory`,
     "locales": [
       "en-US",
       "fr-FR"
     ],
-    "format": "module",
+    "format": "commonjs",
     "projects": {
      // project that pulls from the global configs.
       "project1": {
@@ -74,7 +74,7 @@ module.exports = (function(env) {
         "serviceKey": `${ env.HOME }/.google/override-service-key-lang.json`,
         "spreadsheetId": "override-google-sheet-id",
         "sheetname": "sheet-name-2",
-        "output": `${ env.HOME }/project-name2/i18n-directory/override`,
+        "dir": `${ env.HOME }/project-name2/i18n-directory/override`,
         "locales": [
           "jp-JP",
         ],
@@ -100,10 +100,3 @@ This command will generate a CSV from compatible bundle files. This CSV can be a
 ```sh
 $ i18n csv project2
 ```
-
-## Roadmap
-- [x] Create a CSV from existing i18n modules or JSON files
-- [x] Download bundles from Google Sheets
-- [x] Configure CLI using `.i18nrc` file
-- [x] Configure multiple projects using 1 Google service account.
-- [ ] Import existing i18n modules or JSON files into Google Sheets

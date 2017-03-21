@@ -45,6 +45,7 @@ describe('readDefaultSettings()', () => {
 describe('readProjectSettings()', () => {
   let projectSettings;
   const config = {
+    range: 'A1:M1000',
     projects: { foo: { output: 'bar' } }
   };
 

@@ -1,7 +1,4 @@
-#! /usr/bin/env node
-
 const lib = require('./lib');
-
 const { readConfig, readProjectSettings } = require('./config');
 
 const cli = (config) => (
@@ -11,17 +8,17 @@ const cli = (config) => (
     .command('bundles <project>', 'Converts Google sheet rows to a i18n lang files.', {}, (argv) => {
       console.log('Downloading bundles from Google Sheets...');
       const settings = readProjectSettings(config, argv.project);
-      lib.downloadBundles(settings);
+      require('./commands/bundles')(settings);
     })
     .command('csv <project>', 'Generates a CSV file that can be added to the Google Sheet.', {}, function (argv) {
       console.log('Generating the CSV for upload to Google Sheets...');
       const settings = readProjectSettings(config, argv.project);
-      lib.generateCSV(settings);
+      require('./commands/csv')(settings);
     })
     .command('filterviews <project>', 'Adds the filters views to the Google Sheet', {}, function (argv) {
       console.log('Update the filterview on the Google Sheet...');
       const settings = readProjectSettings(config, argv.project);
-      lib.generateFilterViews(settings);
+      require('./commands/filterviews')(settings);
     })
     .command({
       command: 'version',
@@ -36,7 +33,7 @@ const cli = (config) => (
     .argv
 );
 
-readConfig().then(cli).catch((err) => {
+module.exports = () => readConfig().then(cli).catch((err) => {
   console.error('ERROR: runtime config file cannot be found!\n\n');
   cli({});
 });
