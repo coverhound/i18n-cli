@@ -8,10 +8,9 @@ const getBundleName = (filepath) => {
 
 const globLocaleBundles = (locales, basepath, adapter) => {
   const localesRegex = new RegExp(`${ locales.join('|') }/`);
-  const { extension } = adapter;
 
   return new Promise(function (resolve, reject) {
-    glob(`**/*${ extension }`, {
+    glob(`**/*${ adapter.extension }`, {
       cwd: basepath,
     }, (err, files) => {
       if (err) return reject(err);
