@@ -27,6 +27,20 @@ Now the spreadsheet should be ready to generate bundle files.
 
 All cli configs can be stored inside a `.i18nrc` JSON file. The cli will look at the present working directory for the `.i18nrc` file. This behavior can be overrided by setting the `REACT_I18N` environment.
 
+### Options
+
+| option          | type                            | description                                   | default      |
+| ------          | ----                            | -----------                                   | -------      |
+| `serviceKey`    | `[Object/String]`               | Google service key path or object             | `none`       |
+| `format`        | `String: [commonjs/json/rails]` | One of `commonjs`, `json` and `rails`         | `'commonjs'` |
+| `locales`       | `Array<String>`                 | Output directory                              | `['en-US']`  |
+| `dir`           | `String`                        | Output directory                              | `none`       |
+| `spreadsheetId` | `String`                        | Google spreadsheet ID                         | `none`       |
+| `sheetname`     | `String`                        | Name of the sheet (tab)                       | `none`       |
+| `range`         | `String`                        | Range of cells to read from                   | `'A1:M1000'` |
+| `csvFile`       | `String`                        | Path of file for CSV command to output to     | `none`       |
+| `projects`      | `Object`                        | Object of configuration overrides per project | `none`       |
+
 ```sh
 $ REACT_I18N=/Users/me/.i18nrc i18n [command]
 ```
