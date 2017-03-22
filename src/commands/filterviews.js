@@ -1,3 +1,5 @@
+const { globLocaleBundles, getBundleName } = require('../lib');
+const { authorize, sheets, filterViews } = require('../sheets');
 
 function generateFilterViews({ serviceKey, spreadsheetId, sheetname, range, dir, adapter, locales }) {
   console.log(`[${ sheetname }] finding bundles to create filter views`);
@@ -16,7 +18,7 @@ function generateFilterViews({ serviceKey, spreadsheetId, sheetname, range, dir,
           return filterViews.clear(authClient, spreadsheetId, sheet).then(function () {
             console.log(`[${ sheetname }] cleared existing filter views`);
             return Promise.resolve(sheet);
-          }, function() {
+          }, function(err) {
             console.error(`[${ sheetname }] failed to clear existing filter views`);
             return Promise.reject();
           });
@@ -33,7 +35,7 @@ function generateFilterViews({ serviceKey, spreadsheetId, sheetname, range, dir,
           console.error(`[${ sheetname }] failed to add new filter views\n`, err);
         });
       });
-    }, function () {
+    }, function (err) {
       console.error(`[${ sheetname }] failed to authorize access to ${ spreadsheetId }`);
     });
   }, function (err) {
