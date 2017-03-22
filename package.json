@@ -1,10 +1,11 @@
 {
   "name": "@coverhound/i18n-cli",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "i18n command line interface manager",
   "main": "bin/i18n.js",
   "bin": {
-    "i18n": "bin/i18n.js" },
+    "i18n": "bin/i18n.js"
+  },
   "scripts": {
     "release": "np --yolo",
     "test": "mocha  --require test/test-helper.js"
@@ -19,6 +20,7 @@
     "glob": "^7.1.0",
     "googleapis": "^13.0.0",
     "install": "^0.8.1",
+    "js-yaml": "^3.8.2",
     "mkdirp": "^0.5.1",
     "npm": "^3.10.8",
     "yargs": "^6.3.0"

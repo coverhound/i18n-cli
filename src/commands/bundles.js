@@ -1,33 +1,22 @@
-const { flattenArray, toSnakeCase, tryRequire, writeFile } = require('../utils');
+const { flattenArray, toSnakeCase, tryRequire, writeFile, basename } = require('../utils');
 const { authorize, sheets } = require('../sheets');
 
 const generateLocaleExports = (adapter, outputPath, locales) => {
   const { index } = adapter;
   const localeExportPath = `${outputPath}/${index.name}`;
-  const existingLocales = tryRequire(localeExportPath);
-
-  if (existingLocales) {
-    const existingLocaleKeys = Object.keys(existingLocales).sort();
-
-    if (
-      locales.length === existingLocaleKeys.length &&
-      locales.sort().every((loc, idx) => loc === existingLocaleKeys[idx])
-    ) return;
-  }
-
   const localeList = locales.map((locale) => [toSnakeCase(locale).toUpperCase(), locale]);
   const i18nIndexFile = index.generate({ list: localeList });
 
   return writeFile(localeExportPath, i18nIndexFile);
-}
+};
 
-const generateBundleExports = (adapter, outputPath, files, locales) => {
+const generateBundleExports = (adapter, outputPath, files = [], locales) => {
   const { index } = adapter;
-  if (!files || !files.length || files.every(f => !f.newFile)) return;
+  if (!files.length) return;
 
-  const bundleList = (files || []).map((file) => (
-    [file.bundleName, file.fileName]
-  ));
+  const bundleList = files.map(({ bundleName, pathName }) => (
+    [bundleName, basename(pathName)])
+  );
 
   bundleList.sort((array) => array[0]);
 
@@ -36,50 +25,28 @@ const generateBundleExports = (adapter, outputPath, files, locales) => {
   return locales.map((locale) => (
     writeFile(`${outputPath}/${locale}/${index.name}`, langIndexFile)
   ));
-}
+};
 
 
-function transformBundle(ext, serializer, output, locale, bundles) {
-  return Object.keys(bundles).map(function (bundleName) {
-    const bundleFile = `${ bundleName }${ ext }`;
-    const bundlePath = `${ output }/${ locale }/${ bundleFile }`;
+const transformBundle = (adapter, output, locale, bundles) => (
+  Object.keys(bundles).map(function (bundleName) {
+    const pathName = `${output}/${adapter.path({ bundleName, locale })}`;
     const bundle = bundles[bundleName];
-    const data = serializer(bundle);
+    const data = adapter.serialize(bundle, locale, bundleName);
+    const bundleData = { locale, bundleName, pathName };
 
-    const existingBundle = tryRequire(bundlePath);
+    return writeFile(pathName, data).then(() => Promise.resolve(bundleData));
+  })
+);
 
-    const bundleData = {
-      locale: locale,
-      bundleName: bundleName,
-      fileName: bundleFile,
-      output: bundlePath,
-      newFile: !existingBundle,
-      changed: false
-    }
-
-    // no need to regenerate a bundle that has not been modified
-    if (existingBundle && JSON.stringify(existingBundle) === JSON.stringify(bundle)) {
-      bundleData.changed = false;
-      return Promise.resolve(bundleData);
-    }
-
-    return writeFile(bundlePath, data).then(function () {
-      bundleData.changed = true;
-      return Promise.resolve(bundleData);
-    }, function (err) {
-      return Promise.reject(err);
-    });
-  });
-}
-
-const transformLocaleBundles = (extension, serializer, output, locales = [], localeBundles) => (
+const transformLocaleBundles = (adapter, output, locales = [], localeBundles) => (
   flattenArray(locales.map((locale) => {
     const bundles = localeBundles[locale];
-    return transformBundle(extension, serializer, output, locale, bundles);
+    return transformBundle(adapter, output, locale, bundles);
   }))
 );
 
-function parseRows(locales = [], values = []) {
+const parseRows = (locales = [], values = []) => {
   const bundles = {};
   const localeColumnIndexes = {};
   locales.forEach(function (locale) {
@@ -130,11 +97,11 @@ const downloadBundles = ({ serviceKey, spreadsheetId, sheetname, range, dir, ada
 
     console.log(`[${ sheetname }] writing bundles to ${ dir }`);
     return Promise.all(
-      transformLocaleBundles(extension, serialize, dir, locales, bundles)
+      transformLocaleBundles(adapter, dir, locales, bundles)
     ).catch((err) => console.error(`[${ sheetname }] Write error`, err));
   }).then(function (files = []) {
-    files.forEach((o) => {
-      console.log(`[${ sheetname }] wrote "${ o.bundleName }" - ${ o.output }`);
+    files.forEach(({ bundleName, pathName }) => {
+      console.log(`[${ sheetname }] wrote "${ bundleName }" - ${ pathName }`);
     });
 
     if (!adapter.index) return;

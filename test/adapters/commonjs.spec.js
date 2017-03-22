@@ -4,6 +4,12 @@ const fixture = `${fixturesPath}/sample.js`;
 const sample = require('fs').readFileSync(fixture, 'utf8');
 
 describe('CommonJS Adapter', () => {
+  describe('path()', () => {
+    it('returns a commonjs filepath', () => (
+      expect(subject.path({ bundleName: 'users', locale: 'en-US' })).to.eql('en-US/users.lang.js')
+    ));
+  });
+
   describe('serialize()', () => {
     it('returns a valid commonjs export', () => (
       expect(subject.serialize({foo: 'bar'})).to.eql(sample)

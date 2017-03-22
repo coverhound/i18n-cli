@@ -38,6 +38,7 @@ const flattenArray = (array) => (
 );
 
 module.exports = {
+  basename: path.basename,
   flattenArray,
   parseAsArray,
   toSnakeCase,

@@ -1,5 +1,8 @@
 module.exports = {
   extension: '.lang.js',
+  path({ bundleName, locale }) {
+    return `${locale}/${bundleName}${this.extension}`;
+  },
   serialize: (bundle) => `module.exports = ${JSON.stringify(bundle, null, 2)};\n`,
   read: (filepath) => (
     new Promise((resolve, reject) => {
@@ -25,7 +28,7 @@ module.exports = {
         exports.push(exp);
       });
 
-      return `${imports.join('\n')}\n\nmodule.exports = {\n${exports.join('\n')}\n}`;
+      return `${imports.join('\n')}\n\nmodule.exports = {\n${exports.join('\n')}\n}\n`;
     },
   },
 };
