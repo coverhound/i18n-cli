@@ -17,6 +17,27 @@ describe('parseAsArray()', () => {
   });
 });
 
+describe('flattenObject()', () => {
+  const object = { foo: { bar: [ "baz" ] } };
+
+  const flatObject = {
+    "foo.bar.0": "baz"
+  };
+
+  it('expands objects', () => {
+    expect(subject.flattenObject(object)).to.eql(flatObject);
+  });
+});
+
+describe('expandObject()', () => {
+  const flatObject = { "foo.bar.0": "baz" };
+  const object = { foo: { bar: [ "baz" ] } };
+
+  it('flattens objects', () => {
+    expect(subject.expandObject(flatObject)).to.eql(object);
+  });
+});
+
 describe('toSnakeCase()', () => {
   const kebabCase = 'some-words-go-here';
   const camelCase = 'someWordsGoHere';

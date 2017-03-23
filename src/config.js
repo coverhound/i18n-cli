@@ -1,4 +1,4 @@
-const { parseAsArray } = require('./utils');
+const { parseAsArray, flattenObject, expandObject } = require('./utils');
 const adapters = require('./adapters');
 
 const configPath = () => (
@@ -30,6 +30,15 @@ const readConfig = () => (
   adapters.commonjs.read(configPath()).then(readServiceKey).then(readDefaultSettings)
 );
 
+const adapterMiddleware = (adapter) => (
+  Object.assign({}, adapter, {
+    serialize: (bundle, locale, bundleName) => (
+      adapter.serialize(expandObject(bundle), locale, bundleName)
+    ),
+    read: (filepath) => adapter.read(filepath).then(flattenObject),
+  })
+);
+
 const readProjectSettings = (config, name) => {
   const project = config.projects && name && config.projects[name];
 
@@ -39,10 +48,10 @@ const readProjectSettings = (config, name) => {
   }
 
   const projectConfig = Object.assign({}, config, project);
-  projectConfig.adapter = adapters[projectConfig.format];
+  projectConfig.adapter = adapterMiddleware(adapters[projectConfig.format]);
 
   return projectConfig;
-}
+};
 
 module.exports = {
   configPath,
