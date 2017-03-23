@@ -10,6 +10,12 @@ describe('JSON Adapter', () => {
     ));
   });
 
+  describe('deconstructPath()', () => {
+    it('returns a commonjs filepath', () => (
+      expect(subject.deconstructPath('en-US/users.lang.json')).to.eql({ bundleName: 'users', locale: 'en-US' })
+    ));
+  });
+
   describe('serialize()', () => {
     it('returns a valid json export', () => (
       expect(subject.serialize({foo: 'bar'})).to.eql(sample)

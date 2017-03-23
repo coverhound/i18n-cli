@@ -10,6 +10,12 @@ describe('CommonJS Adapter', () => {
     ));
   });
 
+  describe('deconstructPath()', () => {
+    it('returns a commonjs filepath', () => (
+      expect(subject.deconstructPath('en-US/users.lang.js')).to.eql({ bundleName: 'users', locale: 'en-US' })
+    ));
+  });
+
   describe('serialize()', () => {
     it('returns a valid commonjs export', () => (
       expect(subject.serialize({foo: 'bar'})).to.eql(sample)

@@ -4,14 +4,12 @@ const { writeFile } = require('../utils');
 
 const mergeArrays = (arr1, arr2) => [].concat.apply(arr1, arr2);
 
-const convertRow = (arr) => (
-  rowData = (arr || []).map((item) => JSON.stringify(item)).join(',') + '\n'
+const convertRow = (array = []) => (
+  rowData = array.map((item) => JSON.stringify(item)).join(',') + '\n'
 );
 
-const createFileTransform = (filepath, bundle) => {
-  const locale = path.dirname(filepath);
-  const bundleName = getBundleName(filepath);
-
+const createFileTransform = (adapter, filepath, bundle) => {
+  const { locale, bundleName } = adapter.deconstructPath(filepath);
   return Promise.resolve([locale, bundleName, bundle]);
 };
 
@@ -19,7 +17,7 @@ const readLocaleBundles = (files = [], locales, basepath, adapter) => (
   Promise.all(
     files.map((filePath) => {
       return adapter.read(path.join(basepath, filePath)).
-        then(createFileTransform.bind(this, filePath))
+        then(createFileTransform.bind(this, adapter, filePath))
     })
   ).then((rows = []) => {
     const csvMap = {};

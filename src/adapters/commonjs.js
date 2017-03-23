@@ -3,6 +3,10 @@ module.exports = {
   path({ bundleName, locale }) {
     return `${locale}/${bundleName}${this.extension}`;
   },
+  deconstructPath(path) {
+    const match = /([^\/]+)\/([^\.]+)\./.exec(path);
+    return { locale: match[1], bundleName: match[2] }
+  },
   serialize: (bundle) => `module.exports = ${JSON.stringify(bundle, null, 2)};\n`,
   read: (filepath) => (
     new Promise((resolve, reject) => {
