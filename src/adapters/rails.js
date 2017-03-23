@@ -4,8 +4,11 @@ const fs = require('fs');
 module.exports = {
   extension: '.yml',
   path({ bundleName, locale }) {
-    const shortLocale = locale.split('-')[0];
-    return `${bundleName}.${shortLocale}${this.extension}`;
+    return `${bundleName}.${locale}${this.extension}`;
+  },
+  deconstructPath(path) {
+    const match = /([^\.]+)\.([^\.]+)\./.exec(path);
+    return { locale: match[2], bundleName: match[1] }
   },
   serialize: (bundle, locale, bundleName) => safeDump({ [locale]: { [bundleName]: bundle } }),
   read: (filepath) => (

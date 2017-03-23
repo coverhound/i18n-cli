@@ -59,7 +59,7 @@ const clearFilterViews = (auth, spreadsheetId, sheet) => {
   const request = { auth, spreadsheetId, resource };
 
   return new Promise((resolve, reject) => {
-    sheets.spreadsheets.batchUpdate(request, (err, response) => {
+    spreadsheets.batchUpdate(request, (err, response) => {
       if (err) return reject(err);
       resolve(response);
     });
@@ -98,7 +98,7 @@ const createFilterViews = (auth, spreadsheetId, sheet, bundleNames) => {
   const request = { auth, spreadsheetId, resource };
 
   return new Promise(function(resolve, reject) {
-    sheets.spreadsheets.batchUpdate(request, (err, response) => {
+    spreadsheets.batchUpdate(request, (err, response) => {
       if (err) return reject(err);
       resolve(response);
     });

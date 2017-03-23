@@ -1,17 +1,16 @@
+const logger = require('../logger');
 const path = require('path');
 const { getBundleName, globLocaleBundles } = require('../lib');
 const { writeFile } = require('../utils');
 
 const mergeArrays = (arr1, arr2) => [].concat.apply(arr1, arr2);
 
-const convertRow = (arr) => (
-  rowData = (arr || []).map((item) => JSON.stringify(item)).join(',') + '\n'
+const convertRow = (array = []) => (
+  rowData = array.map((item) => JSON.stringify(item)).join(',') + '\n'
 );
 
-const createFileTransform = (filepath, bundle) => {
-  const locale = path.dirname(filepath);
-  const bundleName = getBundleName(filepath);
-
+const createFileTransform = (adapter, filepath, bundle) => {
+  const { locale, bundleName } = adapter.deconstructPath(filepath);
   return Promise.resolve([locale, bundleName, bundle]);
 };
 
@@ -19,7 +18,7 @@ const readLocaleBundles = (files = [], locales, basepath, adapter) => (
   Promise.all(
     files.map((filePath) => {
       return adapter.read(path.join(basepath, filePath)).
-        then(createFileTransform.bind(this, filePath))
+        then(createFileTransform.bind(this, adapter, filePath))
     })
   ).then((rows = []) => {
     const csvMap = {};
@@ -55,21 +54,23 @@ const readLocaleBundles = (files = [], locales, basepath, adapter) => (
 );
 
 const generateCSV = ({ sheetname, adapter, dir, csvFile, locales }) => {
-  console.log(`[${ sheetname }] finding bundles files`);
-  globLocaleBundles(locales, dir, adapter).then(function(files) {
-    console.log(`[${ sheetname }] reading the bundles data`);
-    readLocaleBundles(files, locales, dir, adapter).then(function (data) {
-      console.log(`[${ sheetname }] writing data to CSV`);
-      writeFile(csvFile, data).then(function () {
-        console.log(`[${ sheetname }] wrote CSV - ${ csvFile }`);
-      }, function (err) {
-        console.error(`[${ sheetname }] error writing CSV`);
-      });
-    }, function (err) {
-      console.error(`[${ sheetname }] error reading bundles`);
+  logger.info('csv.run');
+  logger.info('csv.findBundles', { sheetname });
+
+  globLocaleBundles(locales, dir, adapter).catch((err) => {
+    logger.error('csv.findBundles', err, { sheetname });
+  }).then((files) => {
+    logger.info('csv.readBundles', { sheetname });
+    return readLocaleBundles(files, locales, dir, adapter).catch((err) => {
+      logger.error('csv.readBundles', err, { sheetname });
     });
-  }, function() {
-    console.error(`[${ sheetname }] error finding bundles`);
+  }).then((data) => {
+    logger.info('csv.write', { sheetname });
+    return writeFile(csvFile, data).catch((err) => {
+      logger.error('csv.write', err, { sheetname });
+    });
+  }).then(() => {
+    logger.info('csv.done', { sheetname, csvFile });
   });
 };
 

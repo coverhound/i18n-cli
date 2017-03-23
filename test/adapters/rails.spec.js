@@ -6,7 +6,13 @@ const sample = require('fs').readFileSync(fixture, 'utf8');
 describe('YAML Adapter', () => {
   describe('path()', () => {
     it('returns a rails filepath', () => (
-      expect(subject.path({ bundleName: 'users', locale: 'en-US' })).to.eql('users.en.yml')
+      expect(subject.path({ bundleName: 'users', locale: 'en-US' })).to.eql('users.en-US.yml')
+    ));
+  });
+
+  describe('deconstructPath()', () => {
+    it('returns a commonjs filepath', () => (
+      expect(subject.deconstructPath('users.en-US.yml')).to.eql({ bundleName: 'users', locale: 'en-US' })
     ));
   });
 

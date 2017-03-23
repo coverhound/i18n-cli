@@ -37,9 +37,48 @@ const flattenArray = (array) => (
   array.reduce((flatArray, subArray) => flatArray.slice().concat(subArray), [])
 );
 
+const flattenObject = (object) => {
+  const response = {};
+
+  Object.keys(object).forEach((key) => {
+    const value = object[key];
+
+    if (!object[key]) return response;
+    if (typeof value === 'string') return response[key] = value;
+
+    const flatObject = flattenObject(value);
+    Object.keys(flatObject).forEach((subKey) => {
+      response[`${key}.${subKey}`] = flatObject[subKey];
+    });
+  });
+
+  return response;
+};
+
+const expandObject = (object) => {
+  const response = {};
+
+  Object.keys(object).forEach((key) => {
+    let current = response;
+    let currentKey = "";
+
+    key.split('.').forEach((part, index) => {
+      const isArray = !isNaN(part);
+      current = current[currentKey] || (current[currentKey] = isArray ? [] : {})
+      currentKey = part;
+    });
+
+    current[currentKey] = object[key];
+  });
+
+  return response[''];
+};
+
 module.exports = {
   basename: path.basename,
   flattenArray,
+  flattenObject,
+  expandObject,
   parseAsArray,
   toSnakeCase,
   tryRequire,
