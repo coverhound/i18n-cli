@@ -1,46 +1,44 @@
+const logger = require('../logger');
 const { globLocaleBundles, getBundleName } = require('../lib');
 const { authorize, sheets, filterViews } = require('../sheets');
 
 function generateFilterViews({ serviceKey, spreadsheetId, sheetname, range, dir, adapter, locales }) {
-  console.log(`[${ sheetname }] finding bundles to create filter views`);
-  globLocaleBundles(locales, dir, adapter).then(function (files) {
+  logger.info('filterviews.run');
+  logger.info('filterviews.findBundles', { sheetname });
+
+  globLocaleBundles(locales, dir, adapter).catch((err) => {
+    logger.error('filterviews.findBundles', err, { sheetname });
+  }).then((files) => {
     const bundleNames = files.map(getBundleName).sort();
 
-    console.log(`[${ sheetname }] authorizing access to ${ spreadsheetId }`);
-    authorize(serviceKey).then(function (authClient) {
-      console.log(`[${ sheetname }] retreving existing sheet information`);
-      sheets.retrieve(authClient, spreadsheetId).then(function(spreadsheet) {
-        const sheet = spreadsheet.sheets.filter(function (sheet) {
-          return sheet.properties.title === sheetname;
-        })[0];
-        if (sheet.filterViews && sheet.filterViews.length) {
-          console.log(`[${ sheetname }] clearing existing filter views`);
-          return filterViews.clear(authClient, spreadsheetId, sheet).then(function () {
-            console.log(`[${ sheetname }] cleared existing filter views`);
-            return Promise.resolve(sheet);
-          }, function(err) {
-            console.error(`[${ sheetname }] failed to clear existing filter views`);
-            return Promise.reject();
-          });
-        }
-        return Promise.resolve(sheet);
-      }, function (err) {
-        console.error(`[${ sheetname }] failed to retrieve sheet ${ spreadsheetId }\n`, err);
-        return Promise.reject();
-      }).then(function(sheet) {
-        console.log(`[${ sheetname }] adding new filter views`);
-        filterViews.create(authClient, spreadsheetId, sheet, bundleNames).then(function() {
-          console.log(`[${ sheetname }] added new filter views`);
-        }, function(err) {
-          console.error(`[${ sheetname }] failed to add new filter views\n`, err);
-        });
+    logger.info('filterviews.auth', { sheetname, spreadsheetId });
+    return authorize(serviceKey).catch((err) => {
+      logger.error('filterviews.auth', err, { sheetname, spreadsheetId });
+    }).then((authClient) => ({ authClient, bundleNames }));
+  }).then(({ authClient, bundleNames }) => {
+    logger.info('filterviews.retrieve', { sheetname, spreadsheetId });
+    return sheets.retrieve(authClient, spreadsheetId).catch((err) => {
+      logger.error('filterviews.retrieve', err, { sheetname });
+    }).then((spreadsheet) => {
+      const sheet = spreadsheet.sheets.filter((sheet) => sheet.properties.title === sheetname)[0];
+      if (!sheet.filterViews || !sheet.filterViews.length) return Promise.resolve(sheet);
+
+      logger.info('filterviews.clearing', { sheetname });
+      return filterViews.clear(authClient, spreadsheetId, sheet).catch((err) => {
+        logger.error('filterviews.clearing', err, { sheetname });
+      }).then(() => Promise.resolve(sheet));
+    }).then((sheet) => {
+      logger.info('filterviews.cleared', { sheetname });
+      return Promise.resolve(sheet);
+    }).then((sheet) => {
+      logger.info('filterviews.add', { sheetname });
+      return filterViews.create(authClient, spreadsheetId, sheet, bundleNames).catch((err) => {
+        logger.error('filterviews.add', { sheetname });
       });
-    }, function (err) {
-      console.error(`[${ sheetname }] failed to authorize access to ${ spreadsheetId }`);
+    }).then(() => {
+      logger.info('filterviews.added', { sheetname });
     });
-  }, function (err) {
-    console.error(`[${ sheetname }]`, err);
   });
-}
+};
 
 module.exports = generateFilterViews;

@@ -1,3 +1,4 @@
+const logger = require('../logger');
 const { flattenArray, toSnakeCase, tryRequire, writeFile, basename } = require('../utils');
 const { authorize, sheets } = require('../sheets');
 
@@ -83,43 +84,43 @@ const parseRows = (locales = [], values = []) => {
 }
 
 const downloadBundles = ({ serviceKey, spreadsheetId, sheetname, range, dir, adapter, locales }) => {
-  console.log(`[${ sheetname }] authorizing access to ${ spreadsheetId }`);
-  authorize(serviceKey).then((authClient) => {
-    console.log(`[${ sheetname }] reading ${ spreadsheetId }`);
+  logger.info('bundles.run');
+  logger.info('bundles.auth', { sheetname, spreadsheetId });
+
+  authorize(serviceKey).catch((err) => {
+    logger.error('bundles.auth', err, { sheetname });
+  }).then((authClient) => {
+    logger.info('bundles.read', { sheetname, spreadsheetId });
     return sheets.read(
       authClient, spreadsheetId, `${ sheetname }!${ range }`
     ).catch((err) => {
-      console.log(`[${ sheetname }] Read error`, err);
+      logger.error('bundles.read', err, { sheetname });
     });
   }).then((response) => {
     const bundles = parseRows(locales, response.values);
     const { extension, serialize } = adapter;
 
-    console.log(`[${ sheetname }] writing bundles to ${ dir }`);
+    logger.info('bundles.write', { sheetname, dir });
     return Promise.all(
       transformLocaleBundles(adapter, dir, locales, bundles)
-    ).catch((err) => console.error(`[${ sheetname }] Write error`, err));
-  }).then(function (files = []) {
+    ).catch((err) => logger.error('bundles.write', err, { sheetname }));
+  }).then((files = []) => {
     files.forEach(({ bundleName, pathName }) => {
-      console.log(`[${ sheetname }] wrote "${ bundleName }" - ${ pathName }`);
+      logger.info('bundles.wrote', { sheetname, bundleName, pathName });
     });
 
     if (!adapter.index) return;
 
-    console.log(`[${ sheetname }] Generating imports`);
+    logger.info('bundles.imports', { sheetname });
     return Promise.all([
       generateLocaleExports(adapter, dir, locales),
       generateBundleExports(adapter, dir, files, locales),
-    ]).then(function () {
-      console.log(`[${ sheetname }] Finished generating importing`);
-    }).catch((err) => {
-      console.error(`[${ sheetname }] Error writing imports`, err);
+    ]).catch((err) => {
+      logger.error('bundles.imports', err, { sheetname });
+    }).then(() => {
+      logger.info('bundles.done', { sheetname });
     });
-  }).catch((err) => {
-    console.error(`[${ sheetname }] Authentication error`, err);
-    console.error(err)
-    throw err;
   });
-}
+};
 
 module.exports = downloadBundles;

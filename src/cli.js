@@ -6,17 +6,14 @@ const cli = (config) => (
     .usage('$0 <cmd> [args]')
     .demand(1)
     .command('bundles <project>', 'Converts Google sheet rows to a i18n lang files.', {}, (argv) => {
-      console.log('Downloading bundles from Google Sheets...');
       const settings = readProjectSettings(config, argv.project);
       require('./commands/bundles')(settings);
     })
-    .command('csv <project>', 'Generates a CSV file that can be added to the Google Sheet.', {}, function (argv) {
-      console.log('Generating the CSV for upload to Google Sheets...');
+    .command('csv <project>', 'Generates a CSV file that can be added to the Google Sheet.', {}, (argv) => {
       const settings = readProjectSettings(config, argv.project);
       require('./commands/csv')(settings);
     })
-    .command('filterviews <project>', 'Adds the filters views to the Google Sheet', {}, function (argv) {
-      console.log('Update the filterview on the Google Sheet...');
+    .command('filterviews <project>', 'Adds the filters views to the Google Sheet', {}, (argv) => {
       const settings = readProjectSettings(config, argv.project);
       require('./commands/filterviews')(settings);
     })
