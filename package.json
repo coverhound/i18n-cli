@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "glob": "^7.1.0",
-    "googleapis": "^13.0.0",
+    "googleapis": "^39.1.0",
     "js-yaml": "^3.8.2",
     "mkdirp": "^0.5.1",
     "yargs": "^6.3.0"
